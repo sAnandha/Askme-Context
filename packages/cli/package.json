@@ -1,0 +1,25 @@
+{
+  "name": "@devctx/cli",
+  "version": "0.1.0",
+  "description": "Command-line interface for DevContext Engine",
+  "main": "./dist/index.js",
+  "bin": {
+    "devctx": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@devctx/core": "workspace:*",
+    "chalk": "^5.3.0",
+    "commander": "^11.0.0",
+    "ora": "^8.0.0",
+    "table": "^6.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

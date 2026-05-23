@@ -1,0 +1,42 @@
+{
+  "name": "devctx-engine",
+  "version": "0.1.0",
+  "description": "Universal AI Persistent Context & Orchestration Engine for Development",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/core",
+    "packages/cli",
+    "packages/vscode-extension",
+    "packages/adapters",
+    "packages/security",
+    "packages/context-engine",
+    "packages/embeddings",
+    "packages/token-analyzer",
+    "packages/git-intelligence",
+    "packages/parsers",
+    "packages/shared"
+  ],
+  "scripts": {
+    "build": "npm run -ws build",
+    "build:core": "npm run build -w packages/core",
+    "test": "npm run test -ws",
+    "lint": "eslint packages/*/src --ext .ts",
+    "dev": "npm run dev -ws",
+    "clean": "npm run clean -ws && rm -rf node_modules",
+    "prepack": "npm run build"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "ai",
+    "context",
+    "memory",
+    "architecture",
+    "development",
+    "orchestration"
+  ],
+  "author": "DevContext Team",
+  "license": "MIT"
+}

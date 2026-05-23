@@ -1,0 +1,17 @@
+{
+  "name": "@devctx/security",
+  "version": "0.1.0",
+  "description": "Security and sanitization module for DevContext Engine",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@devctx/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

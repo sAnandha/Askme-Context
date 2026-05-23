@@ -1,0 +1,17 @@
+{
+  "name": "@devctx/embeddings",
+  "version": "0.1.0",
+  "description": "Vector embeddings and semantic search (future enhancement)",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@devctx/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

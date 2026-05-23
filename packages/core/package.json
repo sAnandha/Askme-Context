@@ -1,0 +1,22 @@
+{
+  "name": "@devctx/core",
+  "version": "0.1.0",
+  "description": "Core DevContext Engine SDK",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@devctx/shared": "workspace:*",
+    "@devctx/security": "workspace:*",
+    "@devctx/context-engine": "workspace:*",
+    "@devctx/token-analyzer": "workspace:*",
+    "@devctx/adapters": "workspace:*",
+    "@devctx/git-intelligence": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

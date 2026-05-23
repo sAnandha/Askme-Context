@@ -1,0 +1,17 @@
+{
+  "name": "@devctx/parsers",
+  "version": "0.1.0",
+  "description": "Language parsers and code analysis",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@devctx/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
