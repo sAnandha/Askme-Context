@@ -21,7 +21,7 @@ export class GitIntelligence {
       const output = execSync(command, { encoding: "utf-8" });
 
       const commits: GitChange[] = [];
-      const lines = output.split("\n").filter((line) => line.trim());
+      const lines = output.split("\n").filter((line: string) => line.trim());
 
       for (const line of lines) {
         const parts = line.split("|");
@@ -51,7 +51,7 @@ export class GitIntelligence {
     try {
       const command = `git -C "${this.projectRoot}" diff-tree --no-commit-id --name-only -r ${hash}`;
       const output = execSync(command, { encoding: "utf-8" });
-      return output.split("\n").filter((f) => f.trim());
+      return output.split("\n").filter((f: string) => f.trim());
     } catch {
       return [];
     }
@@ -168,7 +168,7 @@ export class GitIntelligence {
       return {
         commitHash,
         isRollbackSafe: !output.includes("merge"),
-        affectedFiles: output.split("\n").filter((line) => line.includes("|")).length,
+        affectedFiles: output.split("\n").filter((line: string) => line.includes("|")).length,
         description: "Rollback is feasible if no subsequent commits depend on this",
       };
     } catch {
@@ -245,7 +245,7 @@ export class GitIntelligence {
       const command = `git -C "${this.projectRoot}" diff --stat ${commit1}..${commit2}`;
       const output = execSync(command, { encoding: "utf-8" });
 
-      const lines = output.split("\n").filter((l) => l.trim());
+      const lines = output.split("\n").filter((l: string) => l.trim());
 
       return {
         commit1,

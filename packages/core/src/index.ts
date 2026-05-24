@@ -27,6 +27,7 @@ export class DevContextEngine {
       compressionLevel: "medium",
       enableSecurity: true,
       offlineMode: true,
+      autoTrackActivities: true,
     };
 
     this.config = { ...defaultConfig, ...customConfig };
@@ -69,7 +70,7 @@ export class DevContextEngine {
    */
   private async createStarterFiles(devctxPath: string): Promise<void> {
     const files: Record<string, string> = {
-      "memory.json": JSON.stringify(this.getEmptyMemory(), null, 2),
+      "memory.json": JSON.stringify({ projects: {} }, null, 2),
       "architecture.md": `# Architecture Overview
 
 ## System Overview
@@ -190,8 +191,20 @@ export class DevContextEngine {
     const contexts = await this.contextEngine.retrieveContext(request);
     const compressed = contexts
       .slice(0, 5)
-      .map((ctx) => `[${ctx.source}]\n${ctx.content}`)
+      .map((ctx: any) => `[${ctx.source}]\n${ctx.content}`)
       .join("\n\n---\n\n");
+
+    await this.logProcessEvent(
+      "context-retrieval",
+      `Retrieved context for query: ${request.query}`,
+      {
+        query: request.query,
+        processName: request.processName || "ai-context",
+        includeArchitecture: Boolean(request.includeArchitecture),
+        includeSecurity: Boolean(request.includeSecurity),
+        retrievedItems: contexts.length,
+      }
+    );
 
     return this.securitySanitizer.maskSensitiveData(compressed);
   }
@@ -202,6 +215,12 @@ export class DevContextEngine {
   async scanSecurity(): Promise<SecurityScanReport> {
     const memory = await this.contextEngine.loadProjectMemory();
     const sanitizerResult = this.securitySanitizer.scanForSecrets(JSON.stringify(memory));
+
+    await this.logProcessEvent("security-scan", "Executed security scan", {
+      suspiciousPatterns: sanitizerResult.suspiciousPatterns.length,
+      exposedPaths: sanitizerResult.exposedPaths.length,
+      securityScore: sanitizerResult.score,
+    });
 
     return {
       timestamp: new Date(),
@@ -222,7 +241,7 @@ export class DevContextEngine {
     const totalTokens = estimates.reduce((sum, e) => sum + e.totalTokens, 0);
     const totalCost = estimates.reduce((sum, e) => sum + (e.estimatedCost || 0), 0);
 
-    return {
+    const report = {
       totalPrompts: prompts.length,
       totalTokens,
       totalCost,
@@ -232,6 +251,15 @@ export class DevContextEngine {
         estimates.reduce((sum, e) => sum + e.optimizationScore, 0) / estimates.length
       ),
     };
+
+    void this.logProcessEvent("token-analysis", `Analyzed token usage for model ${modelName}`, {
+      modelName,
+      totalPrompts: report.totalPrompts,
+      totalTokens: report.totalTokens,
+      totalCost: report.totalCost,
+    });
+
+    return report;
   }
 
   /**
@@ -255,6 +283,11 @@ export class DevContextEngine {
     memory.lastUpdated = new Date();
 
     await this.contextEngine.saveProjectMemory(memory);
+
+    await this.logProcessEvent("feature-tracked", `Tracked feature: ${featureName}`, {
+      featureName,
+      description,
+    });
   }
 
   /**
@@ -265,7 +298,7 @@ export class DevContextEngine {
     const commits = this.gitIntelligence.getRecentCommits(50);
 
     return {
-      activeFeatures: memory.features.filter((f) => f.status === "active").length,
+      activeFeatures: memory.features.filter((f: any) => f.status === "active").length,
       removedFeatures: memory.removedFeatures.length,
       architectureDecisions: memory.decisions.length,
       securityRules: memory.securityRules.length,
@@ -284,16 +317,25 @@ export class DevContextEngine {
     const architecture = await this.contextEngine.getArchitectureContext();
     const securityRules = await this.contextEngine.getSecurityContext();
 
-    return {
+    const exported = {
       timestamp: new Date(),
       modelProvider,
       systemPrompt: adapter.formatResponseHandling(),
       architecture: architecture.overview,
-      securityConstraints: securityRules.map((r) => `${r.title}: ${r.description}`).join("\n"),
-      features: memory.features.map((f) => f.name).join(", "),
-      removedFeatures: memory.removedFeatures.map((f) => f.name).join(", "),
-      codeStandards: memory.codeStandards.map((s) => s.pattern).join(", "),
+      securityConstraints: securityRules.map((r: any) => `${r.title}: ${r.description}`).join("\n"),
+      features: memory.features.map((f: any) => f.name).join(", "),
+      removedFeatures: memory.removedFeatures.map((f: any) => f.name).join(", "),
+      codeStandards: memory.codeStandards.map((s: any) => s.pattern).join(", "),
     };
+
+    await this.logProcessEvent("context-export", `Exported context for provider ${modelProvider}`, {
+      modelProvider,
+      featureCount: memory.features.length,
+      removedFeatureCount: memory.removedFeatures.length,
+      securityRuleCount: memory.securityRules.length,
+    });
+
+    return exported;
   }
 
   /**
@@ -302,6 +344,12 @@ export class DevContextEngine {
   async detectConflicts(proposedCode: string): Promise<ConflictDetectionResult> {
     const violations = await this.contextEngine.detectArchitectureViolations(proposedCode);
     const secretScan = this.securitySanitizer.scanForSecrets(proposedCode);
+
+    await this.logProcessEvent("conflict-detection", "Ran conflict detection on proposed code", {
+      architectureViolations: violations.length,
+      securityIssues: secretScan.suspiciousPatterns.length,
+      hasConflicts: violations.length > 0 || secretScan.hasSecrets,
+    });
 
     return {
       hasConflicts: violations.length > 0 || secretScan.hasSecrets,
@@ -316,6 +364,50 @@ export class DevContextEngine {
    */
   getConfig(): DevContextConfig {
     return this.config;
+  }
+
+  private async logProcessEvent(
+    eventName: string,
+    summary: string,
+    metadata: Record<string, unknown>
+  ): Promise<void> {
+    if (!this.config.autoTrackActivities) {
+      return;
+    }
+
+    try {
+      const memory = await this.contextEngine.loadProjectMemory();
+      const now = new Date();
+
+      memory.notes.push({
+        id: `activity-${now.getTime()}`,
+        content: `${summary}\n${JSON.stringify(metadata)}`,
+        tags: ["auto-activity", eventName],
+        createdDate: now,
+        updatedDate: now,
+        relatedModules: ["core"],
+      });
+
+      const maxActivityNotes = 200;
+      const activityNotes = memory.notes.filter((note: any) => note.tags?.includes("auto-activity"));
+      if (activityNotes.length > maxActivityNotes) {
+        const removable = activityNotes.length - maxActivityNotes;
+        let removed = 0;
+        memory.notes = memory.notes.filter((note: any) => {
+          if (removed >= removable) return true;
+          if (note.tags?.includes("auto-activity")) {
+            removed += 1;
+            return false;
+          }
+          return true;
+        });
+      }
+
+      memory.lastUpdated = now;
+      await this.contextEngine.saveProjectMemory(memory);
+    } catch {
+      // Do not fail primary operations because activity logging failed.
+    }
   }
 }
 

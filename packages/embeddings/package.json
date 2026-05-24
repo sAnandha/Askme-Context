@@ -1,9 +1,15 @@
 {
   "name": "@devctx/embeddings",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Vector embeddings and semantic search (future enhancement)",
+  "private": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": ["dist", "README.md"],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch"

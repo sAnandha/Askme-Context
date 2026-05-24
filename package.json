@@ -18,7 +18,7 @@
     "packages/shared"
   ],
   "scripts": {
-    "build": "npm run -ws build",
+    "build": "npm run build -w packages/shared && npm run -ws build",
     "build:core": "npm run build -w packages/core",
     "test": "npm run test -ws",
     "lint": "eslint packages/*/src --ext .ts",
@@ -38,5 +38,8 @@
     "orchestration"
   ],
   "author": "DevContext Team",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.19.41"
+  }
 }

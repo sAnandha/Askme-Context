@@ -1,9 +1,15 @@
 {
   "name": "@devctx/token-analyzer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Token counting and cost analysis for AI prompts",
+  "private": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": ["dist", "README.md"],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch"

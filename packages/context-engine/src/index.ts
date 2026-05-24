@@ -20,6 +20,34 @@ export class ContextEngine {
   private memoryCache: Map<string, any> = new Map();
   private securitySanitizer: SecuritySanitizer;
   private snapshots: ContextSnapshot[] = [];
+  private readonly autoSourceNotes: Array<{
+    id: string;
+    fileName: string;
+    tags: string[];
+    updateArchitectureOverview?: boolean;
+  }> = [
+    {
+      id: "auto-source-architecture-md",
+      fileName: "architecture.md",
+      tags: ["auto-source", "architecture"],
+      updateArchitectureOverview: true,
+    },
+    {
+      id: "auto-source-security-md",
+      fileName: "security.md",
+      tags: ["auto-source", "security"],
+    },
+    {
+      id: "auto-source-coding-standards-md",
+      fileName: "coding-standards.md",
+      tags: ["auto-source", "coding-standards"],
+    },
+    {
+      id: "auto-source-ai-rules-md",
+      fileName: "ai-rules.md",
+      tags: ["auto-source", "ai-rules"],
+    },
+  ];
 
   constructor(projectRoot: string) {
     this.projectRoot = projectRoot;
@@ -105,7 +133,7 @@ export class ContextEngine {
   async getRemovedFeaturesContext(): Promise<string> {
     const memory = await this.loadProjectMemory();
     return memory.removedFeatures
-      .map((f) => `${f.name}: ${f.reason} - ${f.whyRemoved}`)
+      .map((f: any) => `${f.name}: ${f.reason} - ${f.whyRemoved}`)
       .join("\n");
   }
 
@@ -114,7 +142,7 @@ export class ContextEngine {
    */
   async getFeatureContext(featureName: string): Promise<FeatureMemory | undefined> {
     const memory = await this.loadProjectMemory();
-    return memory.features.find((f) => f.name.toLowerCase().includes(featureName.toLowerCase()));
+    return memory.features.find((f: any) => f.name.toLowerCase().includes(featureName.toLowerCase()));
   }
 
   /**
@@ -132,6 +160,13 @@ export class ContextEngine {
       const data = await fs.readFile(memoryPath, "utf-8");
       const memory = JSON.parse(data) as ProjectMemory;
 
+      const changed = await this.reflectSourceFilesIntoMemory(memory);
+      if (changed) {
+        memory.lastUpdated = new Date();
+        await this.writeMemoryFile(memory);
+        this.createSnapshot(memory);
+      }
+
       this.memoryCache.set(cacheKey, memory);
       return memory;
     } catch {
@@ -146,15 +181,67 @@ export class ContextEngine {
   async saveProjectMemory(memory: ProjectMemory): Promise<void> {
     const memoryDir = path.join(this.projectRoot, ".devctx");
     await fs.mkdir(memoryDir, { recursive: true });
-
-    const memoryPath = path.join(memoryDir, "memory.json");
-    await fs.writeFile(memoryPath, JSON.stringify(memory, null, 2));
+    await this.writeMemoryFile(memory);
 
     // Clear cache
     this.memoryCache.delete("project-memory");
 
     // Create snapshot
     this.createSnapshot(memory);
+  }
+
+  private async writeMemoryFile(memory: ProjectMemory): Promise<void> {
+    const memoryDir = path.join(this.projectRoot, ".devctx");
+    await fs.mkdir(memoryDir, { recursive: true });
+
+    const memoryPath = path.join(memoryDir, "memory.json");
+    await fs.writeFile(memoryPath, JSON.stringify(memory, null, 2));
+  }
+
+  private async reflectSourceFilesIntoMemory(memory: ProjectMemory): Promise<boolean> {
+    const now = new Date();
+    let hasChanges = false;
+
+    for (const source of this.autoSourceNotes) {
+      const sourcePath = path.join(this.projectRoot, ".devctx", source.fileName);
+      let content: string;
+
+      try {
+        content = (await fs.readFile(sourcePath, "utf-8")).trim();
+      } catch {
+        continue;
+      }
+
+      if (!content) {
+        continue;
+      }
+
+      const existingNote = memory.notes.find((note: any) => note.id === source.id);
+
+      if (!existingNote) {
+        memory.notes.push({
+          id: source.id,
+          content,
+          tags: source.tags,
+          createdDate: now,
+          updatedDate: now,
+          relatedModules: ["devctx"],
+        });
+        hasChanges = true;
+      } else if (existingNote.content !== content) {
+        existingNote.content = content;
+        existingNote.updatedDate = now;
+        hasChanges = true;
+      }
+
+      if (source.updateArchitectureOverview && memory.architecture.overview !== content) {
+        memory.architecture.overview = content;
+        memory.architecture.lastReviewed = now;
+        hasChanges = true;
+      }
+    }
+
+    return hasChanges;
   }
 
   /**
@@ -180,7 +267,7 @@ export class ContextEngine {
 
     // Check for removed features being reimplemented
     for (const removed of memory.removedFeatures) {
-      if (removed.shouldNotReimplement.some((pattern) => proposedCode.includes(pattern))) {
+      if (removed.shouldNotReimplement.some((pattern: any) => proposedCode.includes(pattern))) {
         violations.push(
           `⚠️ Attempted to reimplement removed feature "${removed.name}". Reason: ${removed.reason}`
         );

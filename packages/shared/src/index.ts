@@ -9,6 +9,7 @@ export interface DevContextConfig {
   compressionLevel?: "low" | "medium" | "high";
   enableSecurity: boolean;
   offlineMode: boolean;
+  autoTrackActivities?: boolean;
   secretPatterns?: RegExp[];
 }
 
@@ -206,6 +207,7 @@ export interface ContextRetrievalRequest {
   filters?: ContextFilter[];
   includeArchitecture?: boolean;
   includeSecurity?: boolean;
+  processName?: string;
 }
 
 export interface ContextFilter {

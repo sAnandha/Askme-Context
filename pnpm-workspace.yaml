@@ -1,0 +1,10 @@
+packages:
+  - 'packages/*'
+minimumReleaseAgeExclude:
+  - '@devctx/adapters@0.1.0'
+  - '@devctx/context-engine@0.1.0'
+  - '@devctx/core@0.1.0'
+  - '@devctx/git-intelligence@0.1.0'
+  - '@devctx/security@0.1.0'
+  - '@devctx/shared@0.1.0'
+  - '@devctx/token-analyzer@0.1.0'

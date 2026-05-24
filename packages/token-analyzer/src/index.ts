@@ -222,7 +222,7 @@ export class TokenAnalyzer {
       totalTokens,
       totalCost,
       averageTokensPerPrompt: avgTokensPerPrompt,
-      averageCostPerPrompt,
+      averageCostPerPrompt: avgCostPerPrompt,
       costSavingOpportunities: this.calculateSavingOpportunities(prompts),
     };
   }
