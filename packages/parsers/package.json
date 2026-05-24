@@ -1,11 +1,14 @@
 {
   "name": "@devctx/parsers",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Language parsers and code analysis",
   "private": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
