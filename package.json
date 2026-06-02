@@ -2,8 +2,16 @@
   "name": "devctx-engine",
   "version": "0.1.0",
   "description": "Universal AI Persistent Context & Orchestration Engine for Development",
-  "private": true,
+  "private": false,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sAnandha/Askme-Context.git"
+  },
+  "homepage": "https://github.com/sAnandha/Askme-Context#readme",
+  "bugs": {
+    "url": "https://github.com/sAnandha/Askme-Context/issues"
+  },
   "workspaces": [
     "packages/core",
     "packages/cli",

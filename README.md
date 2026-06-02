@@ -2,6 +2,11 @@
 
 > Universal AI Persistent Context & Orchestration Engine for Development
 
+## Source
+
+- GitHub: https://github.com/sAnandha/Askme-Context
+- npm: https://www.npmjs.com/package/devctx-engine
+
 ---
 
 ## Overview
@@ -198,6 +203,21 @@ devctx git-removed-features
 
 ## Installation
 
+### From npm
+
+```bash
+npm install -g devctx-engine
+```
+
+### From GitHub
+
+```bash
+git clone https://github.com/devctx/devctx-engine.git
+cd devctx-engine
+pnpm install
+pnpm build
+```
+
 ### Global Installation
 
 ```bash
@@ -209,6 +229,21 @@ npm install -g devctx-engine
 ```bash
 npm install --save-dev devctx-engine
 npx devctx init
+```
+
+### Publish Process
+
+To publish updates to npm after pushing to GitHub:
+
+```bash
+npm login
+npm publish --access public
+```
+
+If you publish a specific workspace package instead of the root package, use:
+
+```bash
+npm publish --workspace @devctx/core --access public
 ```
 
 ---
